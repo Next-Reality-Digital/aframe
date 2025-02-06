@@ -13,6 +13,7 @@ require('./rotation');
 require('./scale');
 require('./shadow');
 require('./visible');
+require('./dummy');
 
 stubComponent('cursor');
 stubComponent('geometry');
