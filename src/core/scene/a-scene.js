@@ -212,7 +212,7 @@ module.exports.AScene = registerElement('a-scene', {
      * @returns {Promise}
      */
     enterVR: {
-      value: function (useAR) {
+      value: function (useAR, useOfferSession) {
         var self = this;
         var vrDisplay;
         var vrManager = self.renderer.xr;
@@ -223,45 +223,46 @@ module.exports.AScene = registerElement('a-scene', {
         // Has VR.
         if (this.checkHeadsetConnected() || this.isMobile) {
           vrManager.enabled = true;
+          var rendererSystem = self.getAttribute('renderer');
 
           if (this.hasWebXR) {
             // XR API.
             if (this.xrSession) {
               this.xrSession.removeEventListener('end', this.exitVRBound);
             }
-            navigator.xr.requestSession(useAR ? 'immersive-ar' : 'immersive-vr', {
-              requiredFeatures: ['local-floor'],
-              optionalFeatures: ['bounded-floor']
-            }).then(function requestSuccess (xrSession) {
-              self.xrSession = xrSession;
-              vrManager.setSession(xrSession);
-              xrSession.addEventListener('end', self.exitVRBound);
-              if (useAR) {
-                self.addState('ar-mode');
-              }
-              enterVRSuccess();
+            var refspace = this.sceneEl.systems.webxr.sessionReferenceSpaceType;
+            vrManager.setReferenceSpaceType(refspace);
+            var xrMode = useAR ? 'immersive-ar' : 'immersive-vr';
+            xrInit = this.sceneEl.systems.webxr.sessionConfiguration;
+            return new Promise(function (resolve, reject) {
+              var requestSession = useOfferSession ? navigator.xr.offerSession.bind(navigator.xr) : navigator.xr.requestSession.bind(navigator.xr);
+              self.usedOfferSession |= useOfferSession;
+              requestSession(xrMode, xrInit).then(
+                function requestSuccess (xrSession) {
+                  if (useOfferSession) {
+                    self.usedOfferSession = false;
+                  }
+
+                  vrManager.layersEnabled = xrInit.requiredFeatures.indexOf('layers') !== -1;
+                  vrManager.setSession(xrSession).then(function () {
+                    vrManager.setFoveation(rendererSystem.foveationLevel);
+                    self.xrSession = xrSession;
+                    self.systems.renderer.setWebXRFrameRate(xrSession);
+                    xrSession.addEventListener('end', self.exitVRBound);
+                    enterVRSuccess(resolve);
+                  });
+                },
+                function requestFail (error) {
+                  var useAR = xrMode === 'immersive-ar';
+                  var mode = useAR ? 'AR' : 'VR';
+                  reject(new Error('Failed to enter ' + mode + ' mode (`requestSession`)', { cause: error }));
+                }
+              );
             });
           } else {
-            vrDisplay = utils.device.getVRDisplay();
-            vrManager.setDevice(vrDisplay);
-            if (vrDisplay.isPresenting &&
-                !window.hasNativeWebVRImplementation) {
-              enterVRSuccess();
-              return Promise.resolve();
-            }
-            var rendererSystem = this.getAttribute('renderer');
-            var presentationAttributes = {
-              highRefreshRate: rendererSystem.highRefreshRate,
-              foveationLevel: rendererSystem.foveationLevel,
-              multiview: vrManager.multiview
-            };
-
-            return vrDisplay.requestPresent([{
-              source: this.canvas,
-              attributes: presentationAttributes
-            }]).then(enterVRSuccess, enterVRFailure);
+            var mode = useAR ? 'AR' : 'VR';
+            throw new Error('Failed to enter ' + mode + ' no WebXR');
           }
-          return Promise.resolve();
         }
 
         // No VR.

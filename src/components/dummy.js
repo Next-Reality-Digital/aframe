@@ -1,10 +1,11 @@
-var registerComponent = require('../core/component').registerComponent;
+var registerComponent = require("../core/component").registerComponent;
 
-module.exports.Component = registerComponent('dummy', {
+module.exports.Component = registerComponent("dummy", {
   schema: {
-    foo: {default: 'bar'}
+    foo: { default: "bar" },
   },
   init() {
-    console.log("Dummy component initialized");
+    alert("Dummy component initialized v4");
+    console.log("Dummy component initialized v4", this.data, this.el);
   },
 });

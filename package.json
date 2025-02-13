@@ -5,7 +5,7 @@
   "homepage": "https://aframe.io/",
   "main": "src/index.js",
   "scripts": {
-    "browserify": "browserify src/index.js -s 'AFRAME' -p browserify-derequire",
+    "browserify": "watchify src/index.js -s 'AFRAME' -p browserify-derequire",
     "build": "shx mkdir -p build/ && npm run browserify -- --debug -t [envify --INSPECTOR_VERSION dev] -o build/aframe.js",
     "codecov": "codecov",
     "dev": "npm run build && cross-env INSPECTOR_VERSION=dev node ./scripts/budo -t envify",
@@ -46,6 +46,8 @@
     "present": "0.0.6",
     "promise-polyfill": "^3.1.0",
     "super-animejs": "^3.1.0",
+    "three": "^0.173.0",
+    "watchify": "^4.0.0",
     "webvr-polyfill": "^0.10.10"
   },
   "devDependencies": {
@@ -88,14 +90,13 @@
     "sinon": "^1.17.5",
     "sinon-chai": "2.8.0",
     "snazzy": "^5.0.0",
-    "three": "^0.173.0",
     "too-wordy": "ngokevin/too-wordy",
     "uglifyjs": "^2.4.10",
     "write-good": "^0.9.1"
   },
   "peerDependencies": {
-    "three": "*",
-    "bitecs": "^0.3.38"
+    "bitecs": "^0.3.38",
+    "three": "*"
   },
   "link": true,
   "browserify": {
