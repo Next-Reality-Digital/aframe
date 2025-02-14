@@ -30,7 +30,15 @@ require('./obb-collider');
 require('./oculus-touch-controls');
 require('./raycaster');
 require('./cursor');
-// require('./generic-tracked-controller-controls');
+require('./hp-mixed-reality-controls');
+require('./magicleap-controls');
+require('./oculus-go-controls');
+require('./pico-controls');
+require('./valve-index-controls');
+require('./vive-controls');
+require('./vive-focus-controls');
+require('./windows-motion-controls');
+require('./generic-tracked-controller-controls');
 
 
 // stubComponent('cursor');
