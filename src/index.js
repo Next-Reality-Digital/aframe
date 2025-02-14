@@ -45,5 +45,5 @@ module.exports = window.AFRAME = {
   systems: systems,
   THREE: THREE,
   utils: utils,
-  version: 'hubs/master'
+  version: 'master'
 };
