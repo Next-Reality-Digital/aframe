@@ -31,9 +31,6 @@ var AEntity = require('./core/a-entity'); // Depends on ANode and core component
 require('./core/a-assets');
 require('./core/a-mixin');
 
-console.log('A-Frame Version: https://github.com/Hubs-Foundation/aframe');
-console.log('three Version: https://github.com/Hubs-Foundation/three.js');
-
 module.exports = window.AFRAME = {
   AComponent: require('./core/component').Component,
   AEntity: AEntity,

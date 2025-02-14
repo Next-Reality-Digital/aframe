@@ -21,6 +21,8 @@ registerComponent('obb-collider', {
     this.updateBoundingBox = this.updateBoundingBox.bind(this);
 
     this.el.addEventListener('model-loaded', this.onModelLoaded);
+    // [METAVERSE] The metaverse media loader emits media-loaded event for all elements.
+    this.el.addEventListener('media-loaded', this.onModelLoaded);
     this.updateCollider();
 
     this.system.addCollider(this.el);
@@ -73,7 +75,6 @@ registerComponent('obb-collider', {
     aabb.halfSize.copy(boundingBoxSize).multiplyScalar(0.5);
 
     if (this.el.sceneEl.systems['obb-collider'].data.showColliders) {
-      console.log("Showing collider")
       this.showCollider();
     }
   },

@@ -8,7 +8,6 @@ registerSystem('obb-collider', {
   init: function () {
     this.collisions = [];
     this.colliderEls = [];
-    this.data.showColliders = true;
   },
 
   addCollider: function (colliderEl) {
