@@ -1,6 +1,6 @@
 require('./geometry.js');
 require('./material.js');
-// require('./obb-collider.js');
+require('./obb-collider.js');
 require('./tracked-controls.js');
 require('./webxr.js');
 require('./gltf-model.js');

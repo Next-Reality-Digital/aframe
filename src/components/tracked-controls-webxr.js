@@ -74,7 +74,8 @@ module.exports.Component = registerComponent('tracked-controls-webxr', {
     var sceneEl = this.el.sceneEl;
     var controller = this.controller;
     var frame = sceneEl.renderer?.xr?.getFrame();
-    if (!controller || !sceneEl.frame || !this.system.referenceSpace) { return; }
+    if (!controller || !frame || !this.system.referenceSpace) {
+      return; }
     if (!controller.hand) {
       this.pose = frame.getPose(controller[this.data.space], this.system.referenceSpace);
       this.updatePose();

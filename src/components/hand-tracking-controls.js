@@ -178,7 +178,6 @@ module.exports.Component = registerComponent('hand-tracking-controls', {
     var trackedControlsWebXR = this.el.components['tracked-controls-webxr'];
     var referenceSpace = this.referenceSpace;
     if (!controller || !frame || !referenceSpace || !trackedControlsWebXR) {
-      console.log(controller, frame, referenceSpace, trackedControlsWebXR);
       return;
     }
     this.hasPoses = false;

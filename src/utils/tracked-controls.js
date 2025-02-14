@@ -23,16 +23,12 @@ function checkControllerPresentAndSetup(
   controller = isControllerPresent(component, idPrefix, queryObject);
   isPresent = !!controller;
 
-  console.log("Checking controller presence", controller, isPresent);
-
   // Nothing changed, no need to do anything.
   if (isPresent === component.controllerPresent) {
     return isPresent;
   }
 
   component.controllerPresent = isPresent;
-
-  console.log("Check controller presence and setup for tracked controls");
 
   // Update controller presence.
   if (isPresent) {

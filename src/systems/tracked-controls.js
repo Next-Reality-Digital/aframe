@@ -32,7 +32,6 @@ var System = registerSystem('tracked-controls', {
   },
 
   onInputSourcesChange: function (event) {
-    console.log("tracked controls input source changed", event);
     var self = this;
     var xrSession = this.el.xrSession;
     var refspace = this.el.sceneEl.systems.webxr.sessionReferenceSpaceType;

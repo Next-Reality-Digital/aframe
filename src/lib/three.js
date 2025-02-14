@@ -18,4 +18,5 @@ if (THREE.Cache) {
   THREE.Cache.enabled = true;
 }
 
+
 module.exports = THREE;

@@ -16,6 +16,7 @@ require('./visible');
 require('./dummy');
 require('./material');
 require('./geometry');
+require('./line');
 require('./laser-controls');
 require('./tracked-controls')
 require('./gltf-model');
@@ -24,18 +25,21 @@ require('./hand-tracking-grab-controls');
 require('./scene/xr-mode-ui');
 require('./tracked-controls-webvr');
 require('./tracked-controls-webxr');
+require('./grabbable');
+require('./obb-collider');
+require('./oculus-touch-controls');
+require('./raycaster');
+require('./cursor');
+// require('./generic-tracked-controller-controls');
 
-stubComponent('cursor');
-// stubComponent('geometry');
-stubComponent('generic-tracked-controller-controls');
+
+// stubComponent('cursor');
+// stubComponent('generic-tracked-controller-controls');
 stubComponent('hand-controls');
-// stubComponent('laser-controls');
-stubComponent('line');
 stubComponent('link');
 stubComponent('look-controls');
-// stubComponent('material');
 stubComponent('obj-model');
-stubComponent('raycaster');
+// stubComponent('raycaster');
 stubComponent('sound');
 stubComponent('wasd-controls');
 stubComponent('background');
