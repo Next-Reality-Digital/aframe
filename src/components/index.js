@@ -13,7 +13,6 @@ require('./rotation');
 require('./scale');
 require('./shadow');
 require('./visible');
-require('./dummy');
 require('./material');
 require('./geometry');
 require('./line');
@@ -39,15 +38,14 @@ require('./vive-controls');
 require('./vive-focus-controls');
 require('./windows-motion-controls');
 require('./generic-tracked-controller-controls');
+require('./hide-on-enter-ar');
+require('./hide-on-enter-vr');
+require('./scene/ar-hit-test');
 
-
-// stubComponent('cursor');
-// stubComponent('generic-tracked-controller-controls');
 stubComponent('hand-controls');
 stubComponent('link');
 stubComponent('look-controls');
 stubComponent('obj-model');
-// stubComponent('raycaster');
 stubComponent('sound');
 stubComponent('wasd-controls');
 stubComponent('background');

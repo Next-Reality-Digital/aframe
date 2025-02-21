@@ -13,7 +13,6 @@ var System = registerSystem('tracked-controls', {
 
     this.onExitVR = this.onExitVR.bind(this);
     this.el.addEventListener('exit-vr', this.onExitVR);
-    console.log("Tracked controls system initialized");
   },
 
   onEnterVR: function () {
@@ -21,7 +20,6 @@ var System = registerSystem('tracked-controls', {
     if (!xrSession) {
       console.log("No xrSession for tracked controls");
       return; }
-    console.log("onEnterVR for tracked controls");
     this.el.xrSession.addEventListener('inputsourceschange', this.onInputSourcesChange);
   },
 

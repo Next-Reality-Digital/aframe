@@ -112,7 +112,8 @@ module.exports.Component = registerComponent('hand-tracking-controls', {
     this.el.sceneEl.addEventListener('exit-vr', this.updateReferenceSpace);
     this.el.addEventListener('child-attached', this.onChildAttached);
 
-    this.el.object3D.visible = false;
+    // [METAVERSE] Prevent the hands hiding other objects in the same entity
+    // this.el.object3D.visible = false;
     this.wristObject3D.visible = false;
   },
 
