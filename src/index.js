@@ -23,15 +23,13 @@ var systems = require('./core/system').systems;
 var THREE = window.THREE = require('./lib/three');
 
 require('./components/index'); // Register standard components.
+require('./systems/index'); // Register standard systems.
 
 var ANode = require('./core/a-node');
 var AEntity = require('./core/a-entity'); // Depends on ANode and core components.
 
 require('./core/a-assets');
 require('./core/a-mixin');
-
-console.log('A-Frame Version: https://github.com/Hubs-Foundation/aframe');
-console.log('three Version: https://github.com/Hubs-Foundation/three.js');
 
 module.exports = window.AFRAME = {
   AComponent: require('./core/component').Component,

@@ -196,10 +196,16 @@ module.exports.AScene = registerElement('a-scene', {
 
     enterAR: {
       value: function () {
+        var errorMessage;
         if (!this.hasWebXR) {
-          throw new Error('Failed to enter AR mode, WebXR not supported.');
+          errorMessage = 'Failed to enter AR mode, WebXR not supported.';
+          throw new Error(errorMessage);
         }
-        this.enterVR(true);
+        if (!utils.device.checkARSupport()) {
+          errorMessage = 'Failed to enter AR, WebXR immersive-ar mode not supported in your browser or device.';
+          throw new Error(errorMessage);
+        }
+        return this.enterVR(true);
       }
     },
 
@@ -212,34 +218,55 @@ module.exports.AScene = registerElement('a-scene', {
      * @returns {Promise}
      */
     enterVR: {
-      value: function (useAR) {
+      value: function (useAR, useOfferSession) {
         var self = this;
         var vrDisplay;
         var vrManager = self.renderer.xr;
-
+        var xrInit;
+    
         // Don't enter VR if already in VR.
+        if (useOfferSession && (!navigator.xr || !navigator.xr.offerSession)) { return Promise.resolve('OfferSession is not supported.'); }
+        if (self.usedOfferSession && useOfferSession) { return Promise.resolve('OfferSession was already called.'); }
         if (this.is('vr-mode')) { return Promise.resolve('Already in VR.'); }
-
+    
         // Has VR.
         if (this.checkHeadsetConnected() || this.isMobile) {
+          var rendererSystem = self.getAttribute('renderer');
           vrManager.enabled = true;
-
+    
           if (this.hasWebXR) {
             // XR API.
             if (this.xrSession) {
               this.xrSession.removeEventListener('end', this.exitVRBound);
             }
-            navigator.xr.requestSession(useAR ? 'immersive-ar' : 'immersive-vr', {
-              requiredFeatures: ['local-floor'],
-              optionalFeatures: ['bounded-floor']
-            }).then(function requestSuccess (xrSession) {
-              self.xrSession = xrSession;
-              vrManager.setSession(xrSession);
-              xrSession.addEventListener('end', self.exitVRBound);
-              if (useAR) {
-                self.addState('ar-mode');
-              }
-              enterVRSuccess();
+            var refspace = this.sceneEl.systems.webxr.sessionReferenceSpaceType;
+            vrManager.setReferenceSpaceType(refspace);
+            var xrMode = useAR ? 'immersive-ar' : 'immersive-vr';
+            xrInit = this.sceneEl.systems.webxr.sessionConfiguration;
+            return new Promise(function (resolve, reject) {
+              var requestSession = useOfferSession ? navigator.xr.offerSession.bind(navigator.xr) : navigator.xr.requestSession.bind(navigator.xr);
+              self.usedOfferSession |= useOfferSession;
+              requestSession(xrMode, xrInit).then(
+                function requestSuccess (xrSession) {
+                  if (useOfferSession) {
+                    self.usedOfferSession = false;
+                  }
+    
+                  vrManager.layersEnabled = xrInit.requiredFeatures.indexOf('layers') !== -1;
+                  vrManager.setSession(xrSession).then(function () {
+                    vrManager.setFoveation(rendererSystem.foveationLevel);
+                    self.xrSession = xrSession;
+                    self.systems.renderer.setWebXRFrameRate(xrSession);
+                    xrSession.addEventListener('end', self.exitVRBound);
+                    enterVRSuccess(resolve);
+                  });
+                },
+                function requestFail (error) {
+                  var useAR = xrMode === 'immersive-ar';
+                  var mode = useAR ? 'AR' : 'VR';
+                  reject(new Error('Failed to enter ' + mode + ' mode (`requestSession`)', { cause: error }));
+                }
+              );
             });
           } else {
             vrDisplay = utils.device.getVRDisplay();
@@ -249,27 +276,23 @@ module.exports.AScene = registerElement('a-scene', {
               enterVRSuccess();
               return Promise.resolve();
             }
-            var rendererSystem = this.getAttribute('renderer');
             var presentationAttributes = {
-              highRefreshRate: rendererSystem.highRefreshRate,
-              foveationLevel: rendererSystem.foveationLevel,
-              multiview: vrManager.multiview
+              highRefreshRate: rendererSystem.highRefreshRate
             };
-
+    
             return vrDisplay.requestPresent([{
               source: this.canvas,
               attributes: presentationAttributes
             }]).then(enterVRSuccess, enterVRFailure);
           }
-          return Promise.resolve();
         }
-
+    
         // No VR.
         enterVRSuccess();
         return Promise.resolve();
-
+    
         // Callback that happens on enter VR success or enter fullscreen (any API).
-        function enterVRSuccess () {
+        function enterVRSuccess (resolve) {
           // vrdisplaypresentchange fires only once when the first requestPresent is completed;
           // the first requestPresent could be called from ondisplayactivate and there is no way
           // to setup everything from there. Thus, we need to emulate another vrdisplaypresentchange
@@ -280,15 +303,19 @@ module.exports.AScene = registerElement('a-scene', {
             event = new CustomEvent('vrdisplaypresentchange', {detail: {display: utils.device.getVRDisplay()}});
             window.dispatchEvent(event);
           }
-
-          self.addState('vr-mode');
+    
+          if (useAR) {
+            self.addState('ar-mode');
+          } else {
+            self.addState('vr-mode');
+          }
           self.emit('enter-vr', {target: self});
           // Lock to landscape orientation on mobile.
-          if (!isWebXRAvailable && self.isMobile && screen.orientation && screen.orientation.lock) {
+          if (!self.hasWebXR && self.isMobile && screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('landscape');
           }
           self.addFullScreenStyles();
-
+    
           // On mobile, the polyfill handles fullscreen.
           // TODO: 07/16 Chromium builds break when `requestFullscreen`ing on a canvas
           // that we are also `requestPresent`ing. Until then, don't fullscreen if headset
@@ -296,9 +323,12 @@ module.exports.AScene = registerElement('a-scene', {
           if (!self.isMobile && !self.checkHeadsetConnected()) {
             requestFullscreen(self.canvas);
           }
+    
+          if (resolve) { resolve(); }
         }
-
+    
         function enterVRFailure (err) {
+          self.removeState('vr-mode');
           if (err && err.message) {
             throw new Error('Failed to enter VR mode (`requestPresent`): ' + err.message);
           } else {
@@ -321,25 +351,17 @@ module.exports.AScene = registerElement('a-scene', {
         var vrManager = this.renderer.xr;
 
         // Don't exit VR if not in VR.
-        if (!this.is('vr-mode')) { return Promise.resolve('Not in VR.'); }
+        if (!this.is('vr-mode') && !this.is('ar-mode')) { return Promise.resolve('Not in immersive mode.'); }
 
         // Handle exiting VR if not yet already and in a headset or polyfill.
         if (this.checkHeadsetConnected() || this.isMobile) {
           vrManager.enabled = false;
           vrDisplay = utils.device.getVRDisplay();
-
           if (this.hasWebXR) {
             this.xrSession.removeEventListener('end', this.exitVRBound);
             // Capture promise to avoid errors.
             this.xrSession.end().then(function () {}, function () {});
             this.xrSession = undefined;
-            // HACK we used to null out the session here but now ThreeJS also does its own cleanup on session ending
-            // and expects this not to be null. The enter/exit logic in aframe could be cleaned up to deal with this,
-            // but we plan to get rid of all this code soon anyway so it doesn't seem worth it. The only benefit to
-            // nulling this out here is so that we don't retain the XRSession. The user is either about to exit the
-            // app, or will soon enter VR again (replacing it with a new XRSession) so this is not a very big deal.
-            // We also never call xrManager.getSession() so we don't care about its state.
-            // vrManager.setSession(null);
           } else {
             if (vrDisplay.isPresenting) {
               return vrDisplay.exitPresent().then(exitVRSuccess, exitVRFailure);
@@ -363,6 +385,7 @@ module.exports.AScene = registerElement('a-scene', {
           }
           // Exiting VR in embedded mode, no longer need fullscreen styles.
           if (self.hasAttribute('embedded')) { self.removeFullScreenStyles(); }
+
           if (self.isIOS) { utils.forceCanvasResizeSafariMobile(self.canvas); }
           self.renderer.setPixelRatio(window.devicePixelRatio);
           self.emit('exit-vr', {target: self});

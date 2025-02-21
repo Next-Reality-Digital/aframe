@@ -1,0 +1,9 @@
+var AFRAME_CDN_ROOT = window.AFRAME_CDN_ROOT || "https://cdn.aframe.io/";
+var AFRAME_INJECTED = "aframe-injected";
+var DEFAULT_CAMERA_HEIGHT = 1.6;
+var DEFAULT_HANDEDNESS = "right";
+
+module.exports.AFRAME_CDN_ROOT = AFRAME_CDN_ROOT;
+module.exports.AFRAME_INJECTED = AFRAME_INJECTED;
+module.exports.DEFAULT_CAMERA_HEIGHT = DEFAULT_CAMERA_HEIGHT;
+module.exports.DEFAULT_HANDEDNESS = DEFAULT_HANDEDNESS;
