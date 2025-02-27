@@ -306,6 +306,8 @@ module.exports.AScene = registerElement('a-scene', {
     
           if (useAR) {
             self.addState('ar-mode');
+            // [METAVERSE] Add VR mode state when entering AR mode. Metaverse depends on this state to enable XR features.
+            self.addState('vr-mode');
           } else {
             self.addState('vr-mode');
           }
