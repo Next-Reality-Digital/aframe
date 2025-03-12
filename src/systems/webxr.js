@@ -12,7 +12,7 @@ var System = registerSystem('webxr', {
   schema: {
     referenceSpaceType: {type: 'string', default: 'local-floor'},
     requiredFeatures: {type: 'array', default: ['local-floor']},
-    optionalFeatures: {type: 'array', default: ['bounded-floor']},
+    optionalFeatures: {type: 'array', default: ['bounded-floor', 'layers']},
     overlayElement: {type: 'selector'}
   },
 
