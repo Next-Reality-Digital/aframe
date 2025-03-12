@@ -231,7 +231,6 @@ module.exports.AScene = registerElement('a-scene', {
     
         // Has VR.
         if (this.checkHeadsetConnected() || this.isMobile) {
-          var rendererSystem = self.getAttribute('renderer');
           vrManager.enabled = true;
     
           if (this.hasWebXR) {
@@ -254,7 +253,7 @@ module.exports.AScene = registerElement('a-scene', {
     
                   vrManager.layersEnabled = xrInit.requiredFeatures.indexOf('layers') !== -1;
                   vrManager.setSession(xrSession).then(function () {
-                    vrManager.setFoveation(rendererSystem.foveationLevel);
+                    vrManager.setFoveation(1);
                     self.xrSession = xrSession;
                     self.systems.renderer.setWebXRFrameRate(xrSession);
                     xrSession.addEventListener('end', self.exitVRBound);
@@ -277,7 +276,7 @@ module.exports.AScene = registerElement('a-scene', {
               return Promise.resolve();
             }
             var presentationAttributes = {
-              highRefreshRate: rendererSystem.highRefreshRate
+              highRefreshRate: utils.device.isOculusBrowser()
             };
     
             return vrDisplay.requestPresent([{
