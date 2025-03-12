@@ -255,7 +255,6 @@ module.exports.AScene = registerElement('a-scene', {
                   vrManager.setSession(xrSession).then(function () {
                     vrManager.setFoveation(1);
                     self.xrSession = xrSession;
-                    self.systems.renderer.setWebXRFrameRate(xrSession);
                     xrSession.addEventListener('end', self.exitVRBound);
                     enterVRSuccess(resolve);
                   });
